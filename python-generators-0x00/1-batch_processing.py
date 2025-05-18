@@ -25,6 +25,6 @@ def batch_processing(batch_size):
         # Filter users in the batch
         filtered_users = [user for user in batch if user['age'] > 25]
         # Yield each filtered user individually
-        for user in filtered_users:
-            print(user)  # Print to match 2-main.py output
+        for user in filtered_users:  
             yield user
+            return user
