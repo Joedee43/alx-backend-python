@@ -1,14 +1,14 @@
 import sqlite3
 import functools
-
+from datetime import datetime
 
 #### decorator to lof SQL queries
 def log_queries(func):
     @functools.wraps(func)  # Preserves function metadata
     def wrapper(*args, **kwargs):
         # Extract and log the query (first positional arg or 'query' keyword arg)
-        query = args[0] if args else kwargs.get('query')
-        print(f"Executing SQL query: {query}")
+        insec = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        print(f"Executing SQL query is a {insec}: {args[0]}")
         
         # Execute the original function and return its result
         result = func(*args, **kwargs)
