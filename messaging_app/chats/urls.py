@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Root URL configuration for messaging_app."""
+"""URL configuration for chats app using nested routers."""
 
-from django.contrib import admin
 from django.urls import path, include
+from rest_framework_nested.routers import NestedDefaultRouter
+from .views import ConversationViewSet, MessageViewSet
+
+# Root router
+router = NestedDefaultRouter()
+router.register(r'conversations', ConversationViewSet, basename='conversation')
+
+# Nested router: /conversations/{conversation_id}/messages/
+convo_messages_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')
+convo_messages_router.register(r'messages', MessageViewSet, basename='conversation-messages')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('chats.urls')),
-    path('api-auth/', include('rest_framework.urls')),  # ✅ Add this line
+    path('', include(router.urls)),
+    path('', include(convo_messages_router.urls)),
 ]
