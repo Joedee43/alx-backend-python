@@ -16,4 +16,5 @@ convo_messages_router.register(r'messages', MessageViewSet, basename='conversati
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(convo_messages_router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
 ]
