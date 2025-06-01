@@ -1,14 +1,19 @@
+#!/usr/bin/env python3
+"""URL configuration for chats app using nested routers."""
+
 from django.urls import path, include
-from rest_framework import routers
+from rest_framework_nested.routers import NestedDefaultRouter
 from .views import ConversationViewSet, MessageViewSet
 
-# Create a router and register our viewsets with it.
-router = routers.DefaultRouter()
+# Root router
+router = NestedDefaultRouter()
 router.register(r'conversations', ConversationViewSet, basename='conversation')
-router.register(r'messages', MessageViewSet, basename='message')
 
-# The API URLs are now determined automatically by the router.
+# Nested router: /conversations/{conversation_id}/messages/
+convo_messages_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')
+convo_messages_router.register(r'messages', MessageViewSet, basename='conversation-messages')
+
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/', include('chats.urls')),
+    path('', include(convo_messages_router.urls)),
 ]
