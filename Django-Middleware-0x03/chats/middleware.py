@@ -1,27 +1,21 @@
-from datetime import datetime
-import logging
-from django.http import HttpRequest
+from django.http import HttpResponseForbidden
+from datetime import datetime, time
 
-# Configure logging to write to a file
-logger = logging.getLogger('request_logger')
-logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler('requests.log')
-formatter = logging.Formatter('%(message)s')
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
-
-class RequestLoggingMiddleware:
+class RestrictAccessByTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        # Define allowed hours (9AM to 6PM)
+        self.allowed_start = time(9, 0)  # 9:00 AM
+        self.allowed_end = time(18, 0)   # 6:00 PM
 
-    def __call__(self, request: HttpRequest):
-        # Get the authenticated user or 'Anonymous'
-        user = getattr(request, 'user', None)
-        username = user.username if user and user.is_authenticated else 'Anonymous'
+    def __call__(self, request):
+        current_time = datetime.now().time()
         
-        # Log the request details
-        log_message = f"{datetime.now()} - User: {username} - Path: {request.path}"
-        logger.info(log_message)
+        # Check if request path starts with /chats/ (or your chat endpoints)
+        if request.path.startswith('/chats/') or request.path.startswith('/api/chats/'):
+            if not (self.allowed_start <= current_time <= self.allowed_end):
+                return HttpResponseForbidden(
+                    "Chat access is only available between 9AM and 6PM"
+                )
         
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
