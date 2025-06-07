@@ -6,6 +6,51 @@ from collections import defaultdict
 import logging
 from django.http import HttpResponseForbidden
 from django.contrib.auth.models import User
+import logging
+from datetime import datetime
+from django.http import HttpRequest
+
+# Set up logging configuration
+logger = logging.getLogger('request_logger')
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler('requests.log')
+formatter = logging.Formatter('%(asctime)s - %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+class RequestLoggingMiddleware:
+    """Middleware to log all incoming requests"""
+    
+    def __init__(self, get_response):
+        """Initialize the middleware"""
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        """Process each request and log details"""
+        # Get user information
+        user = getattr(request, 'user', None)
+        username = user.username if user and user.is_authenticated else 'Anonymous'
+        
+        # Log request details
+        log_message = (
+            f"User: {username} - "
+            f"Method: {request.method} - "
+            f"Path: {request.path} - "
+            f"IP: {self.get_client_ip(request)}"
+        )
+        logger.info(log_message)
+        
+        response = self.get_response(request)
+        return response
+
+    def get_client_ip(self, request):
+        """Extract client IP from request"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 logger = logging.getLogger(__name__)
