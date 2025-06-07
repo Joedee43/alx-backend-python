@@ -1,18 +1,26 @@
-#!/usr/bin/env python3
-"""Custom permissions for the messaging app."""
-
 from rest_framework import permissions
 from .models import Conversation, Message
 from typing import Any
 
 
-class IsConversationParticipant(permissions.BasePermission):
-    """Permission to allow access only to conversation participants."""
+class IsParticipantOfConversation(permissions.BasePermission):
+    """
+    Custom permission to only allow:
+    - Authenticated users
+    - Participants of a conversation to access messages
+    """
+    
+    def has_permission(self, request, view):
+        # Allow only authenticated users
+        return request.user and request.user.is_authenticated
 
-    def has_object_permission(self, request: Any, view: Any, obj: Any) -> bool:
-        """Check if the user is a participant in the conversation or message."""
+    def has_object_permission(self, request, view, obj):
+        # For Conversation objects
         if isinstance(obj, Conversation):
-            return request.user in (obj.user1, obj.user2)
+            return request.user in obj.participants.all()
+        
+        # For Message objects
         elif isinstance(obj, Message):
-            return request.user in (obj.conversation.user1, obj.conversation.user2)
+            return request.user in obj.conversation.participants.all()
+        
         return False
