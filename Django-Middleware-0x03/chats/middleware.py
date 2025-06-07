@@ -7,31 +7,7 @@ import logging
 from django.http import HttpResponseForbidden
 from django.contrib.auth.models import User
 
-class RolePermissionMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-        self.protected_paths = [
-            '/api/admin/',
-            '/api/moderator/',
-            '/api/delete/'
-        ]
-        self.allowed_roles = ['admin', 'moderator']
 
-    def __call__(self, request):
-        # Check if request path requires special permissions
-        if any(path in request.path for path in self.protected_paths):
-            user = request.user
-            
-            # Check if user is authenticated and has required role
-            if not (user.is_authenticated and hasattr(user, 'profile') and 
-                   user.profile.role in self.allowed_roles):
-                return HttpResponseForbidden(
-                    "You don't have permission to access this resource",
-                    status=403
-                )
-        
-        return self.get_response(request)
-    
 logger = logging.getLogger(__name__)
 
 class OffensiveLanguageMiddleware:
@@ -89,3 +65,30 @@ class RestrictAccessByTimeMiddleware:
                 )
         
         return self.get_response(request)
+    
+class RolePermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.protected_paths = [
+            '/api/admin/',
+            '/api/moderator/',
+            '/api/delete/'
+        ]
+        self.allowed_roles = ['admin', 'moderator']
+
+    def __call__(self, request):
+        # Check if request path requires special permissions
+        if any(path in request.path for path in self.protected_paths):
+            user = request.user
+            
+            # Check if user is authenticated and has required role
+            if not (user.is_authenticated and hasattr(user, 'profile') and 
+                   user.profile.role in self.allowed_roles):
+                return HttpResponseForbidden(
+                    "You don't have permission to access this resource",
+                    status=403
+                )
+        
+        return self.get_response(request)
+    
+    
