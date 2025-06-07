@@ -3,7 +3,7 @@
 
 import unittest
 from parameterized import parameterized
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from client import GithubOrgClient
 from typing import Dict
 
@@ -24,6 +24,15 @@ class TestGithubOrgClient(unittest.TestCase):
         result = client.org
         mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
         self.assertEqual(result, test_payload)
+
+    def test_public_repos_url(self) -> None:
+        """Test that GithubOrgClient._public_repos_url returns the expected repos_url from org."""
+        test_payload = {"repos_url": "https://api.github.com/orgs/test_org/repos"}
+        with patch('client.GithubOrgClient.org', new_callable=Mock) as mock_org:
+            mock_org.return_value = test_payload
+            client = GithubOrgClient("test_org")
+            result = client._public_repos_url
+            self.assertEqual(result, test_payload["repos_url"])
 
 
 if __name__ == "__main__":
