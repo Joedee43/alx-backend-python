@@ -5,7 +5,7 @@ import unittest
 from parameterized import parameterized
 from unittest.mock import patch, Mock
 from client import GithubOrgClient
-from typing import Dict
+from typing import Dict, List
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -33,6 +33,22 @@ class TestGithubOrgClient(unittest.TestCase):
             client = GithubOrgClient("test_org")
             result = client._public_repos_url
             self.assertEqual(result, test_payload["repos_url"])
+
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json) -> None:
+        """Test that GithubOrgClient.public_repos returns the expected list of repository names."""
+        test_repos_url = "http://mocked/repos"
+        test_payload = [
+            {"name": "repo1"},
+            {"name": "repo2"}
+        ]
+        mock_get_json.return_value = test_payload
+        with patch('client.GithubOrgClient._public_repos_url', return_value=test_repos_url) as mock_repos_url:
+            client = GithubOrgClient("test_org")
+            result = client.public_repos()
+            self.assertEqual(result, ["repo1", "repo2"])
+            mock_repos_url.assert_called_once()
+            mock_get_json.assert_called_once_with(test_repos_url)
 
 
 if __name__ == "__main__":
