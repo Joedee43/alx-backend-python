@@ -5,7 +5,7 @@ import unittest
 from parameterized import parameterized
 from unittest.mock import patch, Mock
 from client import GithubOrgClient
-from typing import Dict, List
+from typing import Dict, List, Mapping
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -49,6 +49,16 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(result, ["repo1", "repo2"])
             mock_repos_url.assert_called_once()
             mock_get_json.assert_called_once_with(test_repos_url)
+
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False),
+    ])
+    def test_has_license(self, repo: Mapping, license_key: str, expected: bool) -> None:
+        """Test that GithubOrgClient.has_license returns whether the repo has the specified license."""
+        client = GithubOrgClient("test_org")
+        result = client.has_license(repo, license_key)
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":
