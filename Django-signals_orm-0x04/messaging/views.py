@@ -1,15 +1,23 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.views.decorators.http import require_POST
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Prefetch
+from .models import Message, User
 
-User = get_user_model()
-
-@require_POST
-@login_required
-def delete_user(request):
-    user = request.user
-    user.delete()
-    messages.success(request, 'Your account has been successfully deleted.')
-    return redirect('delete-account')  
+def conversation_thread(request, message_id):
+    # Get the root message with all replies efficiently
+    message = get_object_or_404(
+        Message.objects.select_related('sender', 'receiver')
+                      .prefetch_related(
+                          Prefetch('replies', 
+                                  queryset=Message.objects.select_related('sender', 'receiver')
+                                  .order_by('timestamp'))
+                      ),
+        pk=message_id
+    )
+    
+    # Get the complete thread
+    thread = message.get_thread()
+    
+    return render(request, 'messaging/thread.html', {
+        'root_message': message,
+        'thread': thread
+    })
