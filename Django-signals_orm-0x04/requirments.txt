@@ -1,0 +1,11 @@
+Django==4.2.*  
+django-debug-toolbar==4.2.*  
+psycopg2-binary==2.9.*  
+python-dotenv==1.0.*  
+django-extensions==3.2.*
+django-crispy-forms==2.* 
+pytest-django==4.5.*
+pytest==7.4.* 
+factory-boy==3.3.* 
+Faker==19.*
+django-redis==5.2.*
