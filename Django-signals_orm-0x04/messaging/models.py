@@ -46,3 +46,6 @@ class MessageHistory(models.Model):
     class Meta:
         ordering = ['-edited_at']
         verbose_name_plural = 'Message Histories'
+
+    def __str__(self):
+        return f"History for message {self.message.id} ({self.edited_at})"
