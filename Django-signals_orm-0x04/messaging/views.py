@@ -12,4 +12,4 @@ def delete_user(request):
     user = request.user
     user.delete()
     messages.success(request, 'Your account has been successfully deleted.')
-    return redirect('home')  # Replace 'home' with your actual home URL name
+    return redirect('delete-account')  
