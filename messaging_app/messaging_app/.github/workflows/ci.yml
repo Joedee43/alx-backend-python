@@ -1,0 +1,53 @@
+name: Test and MYSQL service container
+on: push
+
+
+jobs:
+    test-job:
+        runs-on: ubuntu-latest
+        container: node:20-bookworm-slim
+        services:
+            mysql:
+                image: mysql:latest
+                env:
+                    MYSQL_ROOT_PASSWORD: rootpassword 
+                    MYSQL_DATABASE: test_db         
+                    MYSQL_USER: testuser            
+                    MYSQL_PASSWORD: testpassword 
+                ports:
+                    - 3306:3306
+                options: >-
+                    -- health-cmd "mysqladmin ping -h localhost --silent"
+                    -- health-interval 10s
+                    -- health-timeout 5s
+                    -- health-retries 5
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            
+            - name: Set python
+              uses: actions/setup-python@v5
+              with:
+                python-version: '3.10'
+
+            - name: Install dependencies
+              run: |
+                apt-get update && \
+                apt-get install -y default-libmysqlclient-dev build-essential pkg-config && \
+                apt-get clean  
+
+
+                pip install -r messaging_app/requirements.txt 
+            
+            - name: Run Django Test
+              env:
+                DB_ENGINE: django.db.backends.mysql
+                DB_NAME: test_db
+                DB_USER: testuser
+                DB_PASSWORD: testpassword
+                DB_HOST: 127.0.0.1
+                DB_PORT: 3306
+              run: |
+                python manage.py test
