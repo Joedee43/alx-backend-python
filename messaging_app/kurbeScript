@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "Starting Kubernetes cluster with Minikube..."
+minikube start
+
+kubectl cluster-info
+
+kubectl get pods
