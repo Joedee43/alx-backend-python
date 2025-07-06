@@ -5,7 +5,7 @@ pipeline{
         stage("Pulls messaging app"){
             steps{
                 git(
-                    url: 'https://github.com/Yosef-ft/alx-backend-python.git',
+                    url: 'https://github.com/Joedee43/alx-backend-python.git',
                     // git branch
                     branch: 'main',
                     credentialsId: 'messaging-app-token'
@@ -37,7 +37,7 @@ pipeline{
 
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                        IMAGE_NAME="yosefft/messaging-app:latest"
+                        IMAGE_NAME="yonatan/messaging-app:latest"
 
                         docker build -t $IMAGE_NAME .
                         docker push $IMAGE_NAME
