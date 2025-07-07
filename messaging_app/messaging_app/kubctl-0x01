@@ -1,0 +1,9 @@
+#!/bin/bash
+
+kubectl scale deployment/web --replicas=3
+
+kubectl get pods
+
+kubectl top node
+
+wrk -t2 -c100 -d10s -R1000 http://192.168.49.2:32035
